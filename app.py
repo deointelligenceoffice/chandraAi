@@ -5,7 +5,7 @@ from PIL import Image
 import streamlit as st
 
 # 1. Adds a professional logo/branding at the top of the sidebar
-st.logo("https://your-logo-url.com/logo.png", link="https://deotechnologies.com", icon_image="🚀")
+st.logo("https://i.postimg.cc/q7Rv7FrJ/7da31486-00a2-4f76-a7b0-9ce3acc1933b.jpg", link="https://deotechnologies.com", icon_image="🚀")
 
 # 2. Add a Footer to the sidebar
 with st.sidebar:
