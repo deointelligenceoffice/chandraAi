@@ -3,7 +3,7 @@ import google.generativeai as genai
 import os
 from PIL import Image
 
-# 1. THIS MUST BE FIRST. No other st. commands above this!
+# --- 1. MANDATORY: PAGE CONFIG (MUST BE LINE 1) ---
 st.set_page_config(
     page_title="AI Chandra | Lunar Intelligence", 
     page_icon="🌙", 
@@ -11,11 +11,15 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# 2. NOW you can do branding and logos
+# --- 2. BRANDING & UI STYLING ---
 LOGO_URL = "https://i.postimg.cc/q7Rv7FrJ/7da31486-00a2-4f76-a7b0-9ce3acc1933b.jpg"
+VERSION = "v1.0.0-PRO"
+COMPANY_NAME = "Ai Chandra"
+FOUNDER = "RISHAV RAJ"
+
+# Professional logo/branding
 st.logo(LOGO_URL, link="https://deotechnologies.com", icon_image="🚀")
 
-# --- 3. PREMIUM UI STYLING ---
 st.markdown(
     """
     <style>
@@ -37,8 +41,8 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# --- 4. AUTHENTICATION ---
-if not st.experimental_user.is_logged_in:
+# --- 3. AUTHENTICATION (Using 2026 st.user syntax) ---
+if not st.user.is_logged_in:
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
         st.write("\n" * 5)
@@ -51,30 +55,33 @@ if not st.experimental_user.is_logged_in:
         st.caption(f"© 2026 {COMPANY_NAME} - Established by {FOUNDER}")
     st.stop()
 
-# --- 5. AI ENGINE SETUP ---
+# --- 4. AI ENGINE SETUP ---
 api_key = st.secrets.get("GEMINI_API_KEY")
 CHANDRA_IDENTITY = (
-    f"You are {COMPANY_NAME}, the world's most advanced lunar-grade AI assistant. "
+    f"You are {COMPANY_NAME}, the world's most advanced lunar-grade AI Search Engine. "
     f"You were created and are owned by {FOUNDER}. "
     "Maintain an elite, helpful, and concise tone."
 )
 
 if api_key:
     genai.configure(api_key=api_key)
+    # Using the stable 1.5-flash for maximum reliability with images
     model = genai.GenerativeModel(
-        model_name="gemini-1.5-flash-latest", # Recommended stable flash model
+        model_name="gemini-1.5-flash-latest", 
         system_instruction=CHANDRA_IDENTITY
     )
 else:
     st.error("System Failure: API Key missing in Secrets.")
     st.stop()
 
-# --- 6. SIDEBAR WORKSPACE ---
+# --- 5. SIDEBAR WORKSPACE ---
 with st.sidebar:
     st.markdown(f"# 🌙 {COMPANY_NAME}")
     st.caption(f"Status: Operational | {VERSION}")
     st.divider()
-    st.markdown(f"👤 *Active User:* {st.experimental_user.name}")
+    
+    # Updated to st.user.name for 2026
+    st.markdown(f"👤 *Active User:* {st.user.name}")
 
     choice = st.radio(
         "MISSION CONTROL", 
@@ -82,7 +89,7 @@ with st.sidebar:
     )
     
     st.divider()
-    st.markdown("### 🏢 Parent Company")
+    st.markdown("### DT")
     st.info("AI Chandra is a flagship product of *Deo Technologies*.")
     
     if st.button("🗑️ Reset Neural Link"):
@@ -91,7 +98,7 @@ with st.sidebar:
     if st.button("🚪 Log Out"):
         st.logout()
 
-# --- 7. CORE INTERFACE ---
+# --- 6. CORE INTERFACE ---
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
@@ -108,11 +115,11 @@ else:
     if choice == "🎓 Exam Master":
         c1, c2 = st.columns(2)
         with c1: exam = st.selectbox("Exam", ["IIT-JEE", "NEET", "NDA", "UPSC", "10TH BOARDS", "12TH BOARDS"])
-        with c2: subject = st.selectbox("Subject", ["PHYSICS", "CHEMISTRY", "MATHS", "BIOLOGY" , "REASONING", "CURRENT AFFAIRS", "HISTORY", "GEOGRAPHY" , "CIVICS", "INDIAN POLITY", "INDIAN ECONOMY", "COMPUTER APPLICATIONS"])
+        with c2: subject = st.selectbox("Subject", ["PHYSICS", "CHEMISTRY", "MATHS", "BIOLOGY", "HISTORY", "GEOGRAPHY"])
         type_ = st.selectbox("Task", ["Doubt Solver", "PYQ Solution", "Concept Breakdown"])
         module_context = f"[Target: {exam}, Subject: {subject}, Mode: {type_}] "
 
-    # Display Chat
+    # Display Chat History
     for message in st.session_state.chat_history:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
@@ -129,12 +136,11 @@ else:
             try:
                 if uploaded_file:
                     img = Image.open(uploaded_file)
-                    # Vision model call
                     response = model.generate_content([module_context + prompt, img])
                     st.markdown(response.text)
                     st.session_state.chat_history.append({"role": "assistant", "content": response.text})
                 else:
-                    # Text-only Chat Session
+                    # History processing for text chat
                     history_for_api = []
                     for m in st.session_state.chat_history[:-1]:
                         role = "user" if m["role"] == "user" else "model"
